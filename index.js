@@ -3,6 +3,7 @@
 var assert = require('assert');
 
 function JTrace() {
+  this.enabled  = false;
   this.handlers = [];
 }
 
@@ -38,6 +39,7 @@ JTrace.prototype.emit = function emitTrace(facets, vector, values) {
 };
 
 JTrace.prototype.on = function onTrace(facetMask, vectorMask, handler) {
+  this.enabled = true;
   this.handlers.push({
     facetMask  : facetMask,
     vectorMask : vectorMask,
@@ -88,6 +90,9 @@ Tracer.WARN  = 0x40;
 Tracer.ERROR = 0x50;
 
 Tracer.prototype.trace = function (level, args) {
+  // shortcut when tracing is disabled
+  if (!this.jtrace.enabled) return;
+
   // from http://goo.gl/WaH2L
   var values = Array.prototype.slice.call(args);
   var facets = _facets(this, []);
