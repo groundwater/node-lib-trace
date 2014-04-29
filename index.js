@@ -11,10 +11,6 @@ function JTrace() {
            the facets of a probe should be fixed,
            and order from general to specific
 
-  vector   an array of numbers
-           the vector provides a partial ordering over the
-           values of a particular probe
-
   values   an array of objects
            the values are opaque to the tracer,
            they are meant to be interpreted and consumed
@@ -23,29 +19,23 @@ function JTrace() {
 */
 JTrace.prototype.emit = function emitTrace(facets, trap) {
   this.handlers.forEach(function (item) {
-    var facetMask  = item.facetMask;
-    var handler    = item.handler;
+    var filter  = item.filter;
+    var handler = item.handler;
 
-    var isMatch = true;
-
-    // can filter against facets only
-    if (facetMask) isMatch = match(facetMask, facets);
+    // filter function determines if we invoke the trap
+    var isMatch = filter(facets);
 
     if (isMatch) handler(facets, trap());
   });
 };
 
-JTrace.prototype.on = function onTrace(facetMask, handler) {
+JTrace.prototype.on = function onTrace(filter, handler) {
   this.enabled = true;
   this.handlers.push({
-    facetMask  : facetMask,
-    handler    : handler,
+    filter  : filter,
+    handler : handler,
   });
 };
-
-function match(pattern, value) {
-  return true;
-}
 
 function Trace() {
   this.module = null;

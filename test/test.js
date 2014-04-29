@@ -4,6 +4,8 @@ var jtrace = require('../index.js');
 var JTrace = jtrace.JTrace;
 var Tracer = jtrace.Tracer;
 
+function yes() { return true; }
+
 test('happy path', function (t) {
   t.plan(4);
 
@@ -11,7 +13,7 @@ test('happy path', function (t) {
   var trace = Tracer.NewJTracer(jtrace);
   var item = {a: 1};
 
-  jtrace.on(null, function (facets, values) {
+  jtrace.on(yes, function (facets, values) {
     t.equals(facets.target, 'test');
     t.equals(facets.level, 001);
     t.deepEquals(facets.module, ['/']);
@@ -29,7 +31,7 @@ test('child path', function (t) {
   var trace = Tracer.NewJTracer(jtrace).segment('my_module');
   var item = {a: 1};
 
-  jtrace.on(null, function (facets, values) {
+  jtrace.on(yes, function (facets, values) {
     t.equals(facets.target, 'test');
     t.equals(facets.level, 001);
     t.deepEquals(facets.module, ['/', 'my_module']);
