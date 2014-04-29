@@ -4,124 +4,38 @@ var jtrace = require('../index.js');
 var JTrace = jtrace.JTrace;
 var Tracer = jtrace.Tracer;
 
-test(function (t) {
-  var jtrace = new JTrace();
+test('happy path', function (t) {
+  t.plan(4);
 
+  var jtrace = new JTrace();
   var trace = Tracer.NewJTracer(jtrace);
+  var item = {a: 1};
 
-  t.equals(trace.module, '/');
+  jtrace.on(null, function (facets, values) {
+    t.equals(facets.target, 'test');
+    t.equals(facets.level, 001);
+    t.deepEquals(facets.module, ['/']);
+    t.deepEquals(item, values);
+  });
+
+  trace.dir('test', item);
   t.end();
 });
 
-test(function (t) {
-  t.plan(1);
-  var jtrace = new JTrace();
+test('child path', function (t) {
+  t.plan(4);
 
-  jtrace.on([],[],function(a,b,c){
-    t.equals(c, 'hello world');
+  var jtrace = new JTrace();
+  var trace = Tracer.NewJTracer(jtrace).segment('my_module');
+  var item = {a: 1};
+
+  jtrace.on(null, function (facets, values) {
+    t.equals(facets.target, 'test');
+    t.equals(facets.level, 001);
+    t.deepEquals(facets.module, ['/', 'my_module']);
+    t.deepEquals(item, values);
   });
 
-  jtrace.emit([], [], 'hello world')
-  t.end();
-});
-
-test(function (t) {
-  t.plan(1);
-  var jtrace = new JTrace();
-
-  jtrace.on(['a','d'],[],function(a,b,c){
-    t.equals(c, 'hello world');
-  });
-
-  jtrace.emit(['abc','def'], [], 'hello world')
-  t.end();
-});
-
-test('first arg as facet', function (t) {
-  t.plan(1);
-  var jtrace = new JTrace();
-
-  jtrace.on(['/'],[],function(a,b,c){
-    t.equals(a[1], 'hello world');
-  });
-
-  var trace = Tracer.NewJTracer(jtrace);
-
-  trace.dir('hello world');
-  t.end();
-});
-
-test('dir level', function (t) {
-  t.plan(2);
-  var jtrace = new JTrace();
-
-  jtrace.on(['/'],[],function(a,b,c){
-    t.equals(a[1], 'hello world');
-    t.equals(b[0], 0x10);
-  });
-
-  var trace = Tracer.NewJTracer(jtrace);
-
-  trace.dir('hello world');
-  t.end();
-});
-
-test('log level', function (t) {
-  t.plan(2);
-  var jtrace = new JTrace();
-
-  jtrace.on(['/'],[],function(a,b,c){
-    t.equals(a[1], 'hello world');
-    t.equals(b[0], 0x20);
-  });
-
-  var trace = Tracer.NewJTracer(jtrace);
-
-  trace.log('hello world');
-  t.end();
-});
-
-test('info level', function (t) {
-  t.plan(2);
-  var jtrace = new JTrace();
-
-  jtrace.on(['/'],[],function(a,b,c){
-    t.equals(a[1], 'hello world');
-    t.equals(b[0], 0x30);
-  });
-
-  var trace = Tracer.NewJTracer(jtrace);
-
-  trace.info('hello world');
-  t.end();
-});
-
-test('warn level', function (t) {
-  t.plan(2);
-  var jtrace = new JTrace();
-
-  jtrace.on(['/'],[],function(a,b,c){
-    t.equals(a[1], 'hello world');
-    t.equals(b[0], 0x40);
-  });
-
-  var trace = Tracer.NewJTracer(jtrace);
-
-  trace.warn('hello world');
-  t.end();
-});
-
-test('error level', function (t) {
-  t.plan(2);
-  var jtrace = new JTrace();
-
-  jtrace.on(['/'],[],function(a,b,c){
-    t.equals(a[1], 'hello world');
-    t.equals(b[0], 0x50);
-  });
-
-  var trace = Tracer.NewJTracer(jtrace);
-
-  trace.error('hello world');
+  trace.dir('test', item);
   t.end();
 });

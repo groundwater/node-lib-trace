@@ -1,5 +1,3 @@
-'use strict';
-
 var assert = require('assert');
 
 function JTrace() {
@@ -23,10 +21,9 @@ function JTrace() {
            by the tracer requesting them
 
 */
-JTrace.prototype.emit = function emitTrace(facets, vector, values) {
+JTrace.prototype.emit = function emitTrace(facets, trap) {
   this.handlers.forEach(function (item) {
     var facetMask  = item.facetMask;
-    var vectorMask = item.vectorMask; // unused
     var handler    = item.handler;
 
     var isMatch = true;
@@ -34,42 +31,37 @@ JTrace.prototype.emit = function emitTrace(facets, vector, values) {
     // can filter against facets only
     if (facetMask) isMatch = match(facetMask, facets);
 
-    if (isMatch) handler(facets, vector, values);
+    if (isMatch) handler(facets, trap());
   });
 };
 
-JTrace.prototype.on = function onTrace(facetMask, vectorMask, handler) {
+JTrace.prototype.on = function onTrace(facetMask, handler) {
   this.enabled = true;
   this.handlers.push({
     facetMask  : facetMask,
-    vectorMask : vectorMask,
     handler    : handler,
   });
 };
 
 function match(pattern, value) {
-  var i, val, item;
-
-  for (i in pattern) {
-    item = pattern[i];
-    val  = value[i];
-
-    // under-specified patterns match automatically
-    if (item === undefined)    return true;
-
-    // under-specified values don't match
-    if (val  === undefined)    return false;
-
-    // empty strings are like wild cards
-    if (item === '')           continue;
-
-    // the pattern must partially match
-    if (val.indexOf(item) < 0) return false;
-
-    i++;
-  }
   return true;
 }
+
+function Trace() {
+  this.module = null;
+  this.target = null;
+
+  this.level  = 0;
+}
+
+Trace.DIR   = 001;
+Trace.LOG   = 002;
+Trace.INFO  = 004;
+Trace.WARN  = 010;
+Trace.ERROR = 020;
+
+Trace.NONE  = 000;
+Trace.ALL   = 777;
 
 function Tracer() {
   this.jtrace = null;
@@ -83,61 +75,62 @@ function _facets(tracer, array) {
   else return array;
 }
 
-Tracer.DIR   = 0x10;
-Tracer.LOG   = 0x20;
-Tracer.INFO  = 0x30;
-Tracer.WARN  = 0x40;
-Tracer.ERROR = 0x50;
-
-Tracer.prototype.trace = function (level, args) {
+Tracer.prototype.trap = function (level, target, trap) {
   // shortcut when tracing is disabled
   if (!this.jtrace.enabled) return;
 
   // from http://goo.gl/WaH2L
-  var values = Array.prototype.slice.call(args);
-  var facets = _facets(this, []);
+  var facets = {
+    module : _facets(this, []),
+    target : target,
+    level  : level
+  };
 
-  // the first argument is a facet
-  var target = values.shift();
-
-  facets.push(target);
-
-  this.jtrace.emit(facets, [level], values);
+  this.jtrace.emit(facets, trap);
 };
 
-Tracer.prototype.dir = function dirTrace(target) {
+Tracer.prototype.trace = function (level, target, value) {
+  var out;
+
+  if (typeof value === 'function') out = value;
+  else out = function () { return value };
+
+  this.trap(level, target, out);
+};
+
+Tracer.prototype.dir = function dirTrace(target, value) {
   assert(target);
   assert.equal(typeof target, 'string');
 
-  this.trace(Tracer.DIR, arguments);
+  this.trace(Trace.DIR, target, value);
 };
 
-Tracer.prototype.log = function logTrace(target) {
+Tracer.prototype.log = function logTrace(target, value) {
   assert(target);
   assert.equal(typeof target, 'string');
 
-  this.trace(Tracer.LOG, arguments);
+  this.trace(Trace.LOG, target, value);
 };
 
-Tracer.prototype.info = function infoTrace(target) {
+Tracer.prototype.info = function infoTrace(target, value) {
   assert(target);
   assert.equal(typeof target, 'string');
 
-  this.trace(Tracer.INFO, arguments);
+  this.trace(Trace.INFO, target, value);
 };
 
-Tracer.prototype.warn = function warnTrace(target) {
+Tracer.prototype.warn = function warnTrace(target, value) {
   assert(target);
   assert.equal(typeof target, 'string');
 
-  this.trace(Tracer.WARN, arguments);
+  this.trace(Trace.WARN, target, value);
 };
 
-Tracer.prototype.error = function errorTrace(target) {
+Tracer.prototype.error = function errorTrace(target, value) {
   assert(target);
   assert.equal(typeof target, 'string');
 
-  this.trace(Tracer.ERROR, arguments);
+  this.trace(Trace.ERROR, target, value);
 };
 
 Tracer.prototype.segment = function segment(name) {

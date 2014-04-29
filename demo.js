@@ -1,15 +1,4 @@
-# dynamic tracing library
-
-## install
-
-```bash
-npm install --save lib-trace
-```
-
-## usage
-
-```javascript
-var trace  = require('lib-trace');
+var trace  = require('./index.js');
 var JTrace = trace.JTrace;
 var Tracer = trace.Tracer;
 var jtrace = new JTrace();
@@ -33,13 +22,3 @@ child.log('event4', function () {
   // some expensive synchronous function
   return 'expensive value'
 });
-```
-
-This will output
-
-```text
-/ event1 hello world
-/ event2 goodbye
-/:child1 event3 ahoy hoy
-/:child1 event4 expensive value
-```
