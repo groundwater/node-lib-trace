@@ -65,7 +65,7 @@ function match(pattern, value) {
     if (val.indexOf(item) < 0) return false;
 
     i++;
-  };
+  }
   return true;
 }
 
@@ -93,7 +93,7 @@ Tracer.prototype.trace = function (level, args) {
   var facets = _facets(this, []);
 
   // the first argument is a facet
-  var target = values.shift()
+  var target = values.shift();
 
   facets.push(target);
 

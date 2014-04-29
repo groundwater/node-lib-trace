@@ -1,15 +1,16 @@
 {
   "name": "lib-trace",
   "version": "0.0.0",
-  "description": "",
+  "description": "dynamic tracing",
   "main": "index.js",
   "scripts": {
-    "test": "tap test"
+    "test": "jshint index.js && tap test"
   },
-  "author": "",
+  "author": "Jacob Groundwater <groundwater@gmail.com>",
   "license": "ISC",
   "devDependencies": {
-    "tap": "^0.4.8"
+    "tap": "^0.4.8",
+    "jshint": "^2.5.0"
   },
   "repository": {
     "type": "git",
