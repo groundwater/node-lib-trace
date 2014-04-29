@@ -1,0 +1,22 @@
+{
+  "name": "lib-trace",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "tap test"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tap": "^0.4.8"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/groundwater/node-lib-trace.git"
+  },
+  "bugs": {
+    "url": "https://github.com/groundwater/node-lib-trace/issues"
+  },
+  "homepage": "https://github.com/groundwater/node-lib-trace"
+}
