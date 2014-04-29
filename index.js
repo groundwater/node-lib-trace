@@ -76,10 +76,6 @@ function _facets(tracer, array) {
 }
 
 Tracer.prototype.trap = function (level, target, trap) {
-  // shortcut when tracing is disabled
-  if (!this.jtrace.enabled) return;
-
-  // from http://goo.gl/WaH2L
   var facets = {
     module : _facets(this, []),
     target : target,
@@ -90,6 +86,9 @@ Tracer.prototype.trap = function (level, target, trap) {
 };
 
 Tracer.prototype.trace = function (level, target, value) {
+  // stop early when disabled
+  if (!this.jtrace.enabled) return;
+
   var out;
 
   if (typeof value === 'function') out = value;
