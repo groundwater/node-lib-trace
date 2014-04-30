@@ -52,6 +52,9 @@ function _trap(probe, rank, event, order, trap) {
 function _trace(probe, rank, event, order, value) {
   assert(event);
   assert.equal(typeof event, 'string');
+  
+  assert(order);
+  assert.equal(typeof order, 'string')
 
   // stop early when disabled
   if (!probe.tracer.enabled) return;

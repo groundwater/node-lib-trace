@@ -20,7 +20,7 @@ test('happy path', function (t) {
     t.deepEquals(item, values);
   });
 
-  trace.dir('test', '', item);
+  trace.dir('test', 'test', item);
   t.end();
 });
 
@@ -38,6 +38,6 @@ test('child path', function (t) {
     t.deepEquals(item, values);
   });
 
-  trace.dir('test', '', item);
+  trace.dir('test', 'test', item);
   t.end();
 });
