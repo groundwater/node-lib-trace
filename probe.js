@@ -86,7 +86,7 @@ Probe.prototype.error = function errorTrace(event, order, value) {
 
 Probe.prototype.make = function make(name) {
   assert(name, 'new probes need a name');
-  
+
   var probe = Probe.New();
 
   probe.module = name;
@@ -103,7 +103,7 @@ Probe.NewWithTracer = function NewWithTracer(tracer) {
   var probe = Probe.New();
 
   probe.tracer = tracer;
-  probe.module = '/';
+  probe.module = 'ROOT';
 
   return probe;
 };

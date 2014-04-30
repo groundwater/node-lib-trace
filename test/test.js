@@ -16,7 +16,7 @@ test('happy path', function (t) {
   jtrace.on(yes, function (facets, values) {
     t.equals(facets.event, 'test');
     t.equals(facets.rank, 001);
-    t.deepEquals(facets.module, '/');
+    t.deepEquals(facets.module, 'ROOT');
     t.deepEquals(item, values);
   });
 
