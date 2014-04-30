@@ -1,20 +1,36 @@
 var assert = require('assert');
 
-function Trace() {
-  this.module = null;
-  this.target = null;
+// brand  (probe)   these are all probes
+// module (http)    the module the probe fires from
+// event  (request) the event and object of interest
+// order  (begin)   related to the lifecycle of the event
+// rank   (0xFF)    the granularity of the event
 
-  this.level  = 0;
+var PROBE = 'probe';
+
+function Facet() {
+  this.brand  = PROBE;
+  this.module = null;
+  this.event  = null;
+  this.order  = null;
+  this.rank   = 0x00;
 }
 
-Trace.DIR   = 001;
-Trace.LOG   = 002;
-Trace.INFO  = 004;
-Trace.WARN  = 010;
-Trace.ERROR = 020;
+Facet.RANK        = {};
+Facet.RANK.DIR    = 001;
+Facet.RANK.LOG    = 002;
+Facet.RANK.INFO   = 004;
+Facet.RANK.WARN   = 010;
+Facet.RANK.ERROR  = 020;
+Facet.RANK.NONE   = 000;
+Facet.RANK.ALL    = 777;
 
-Trace.NONE  = 000;
-Trace.ALL   = 777;
+Facet.ORDER       = {};
+Facet.ORDER.BEGIN = 'begin';
+Facet.ORDER.ERROR = 'error';
+Facet.ORDER.CLOSE = 'close';
+Facet.ORDER.DATA  = 'data';
+Facet.ORDER.END   = 'end';
 
 function Probe() {
   this.tracer = null;
@@ -22,74 +38,58 @@ function Probe() {
   this.parent = null;
 }
 
-function _facets(tracer, array) {
-  array.unshift(tracer.module);
-  if (tracer.parent) return _facets(tracer.parent, array);
-  else return array;
-}
+function _trap(probe, rank, event, order, trap) {
+  var facet = new Facet();
 
-Probe.prototype.trap = function (level, target, trap) {
-  var facets = {
-    module : _facets(this, []),
-    target : target,
-    level  : level
-  };
+  facet.module = probe.module;
+  facet.event  = event;
+  facet.order  = order;
+  facet.rank   = rank;
 
-  this.tracer.emit(facets, trap);
+  probe.tracer.emit(facet, trap);
 };
 
-Probe.prototype.trace = function (level, target, value) {
+function _trace(probe, rank, event, order, value) {
+  assert(event);
+  assert.equal(typeof event, 'string');
+
   // stop early when disabled
-  if (!this.tracer.enabled) return;
+  if (!probe.tracer.enabled) return;
 
-  var out;
+  var trap;
 
-  if (typeof value === 'function') out = value;
-  else out = function () { return value };
+  if (typeof value === 'function') trap = value;
+  else trap = function () { return value };
 
-  this.trap(level, target, out);
+  _trap(probe, rank, event, order, trap);
 };
 
-Probe.prototype.dir = function dirTrace(target, value) {
-  assert(target);
-  assert.equal(typeof target, 'string');
-
-  this.trace(Trace.DIR, target, value);
+Probe.prototype.dir = function dirTrace(event, order, value) {
+  _trace(this, Facet.RANK.DIR, event, order, value);
 };
 
-Probe.prototype.log = function logTrace(target, value) {
-  assert(target);
-  assert.equal(typeof target, 'string');
-
-  this.trace(Trace.LOG, target, value);
+Probe.prototype.log = function logTrace(event, order, value) {
+  _trace(this, Facet.RANK.LOG, event, order, value);
 };
 
-Probe.prototype.info = function infoTrace(target, value) {
-  assert(target);
-  assert.equal(typeof target, 'string');
-
-  this.trace(Trace.INFO, target, value);
+Probe.prototype.info = function infoTrace(event, order, value) {
+  _trace(this, Facet.RANK.INFO, event, order, value);
 };
 
-Probe.prototype.warn = function warnTrace(target, value) {
-  assert(target);
-  assert.equal(typeof target, 'string');
-
-  this.trace(Trace.WARN, target, value);
+Probe.prototype.warn = function warnTrace(event, order, value) {
+  _trace(this, Facet.RANK.WARN, event, order, value);
 };
 
-Probe.prototype.error = function errorTrace(target, value) {
-  assert(target);
-  assert.equal(typeof target, 'string');
-
-  this.trace(Trace.ERROR, target, value);
+Probe.prototype.error = function errorTrace(event, order, value) {
+  _trace(this, Facet.RANK.ERROR, event, order, value);
 };
 
-Probe.prototype.segment = function segment(name) {
+Probe.prototype.make = function make(name) {
+  assert(name, 'new probes need a name');
+  
   var probe = Probe.New();
 
   probe.module = name;
-  probe.parent = this;
   probe.tracer = this.tracer;
 
   return probe;
