@@ -69,7 +69,7 @@ function _trace(probe, rank, event, order, value) {
 };
 
 function _mutate(probe, rank, arguments) {
-  assert(arguments.length >= 2, 'too few arguments');
+  assert(arguments.length > 0, 'too few arguments');
 
   var event, order, value;
 
@@ -81,6 +81,10 @@ function _mutate(probe, rank, arguments) {
   } else if (arguments.length === 2) {
     order = Facet.ORDER.MARK;
     value = arguments[1];
+  } else {
+    // value not provided
+    order = Facet.ORDER.MARK;
+    value = null;
   }
 
   _trace(probe, rank, event, order, value);
