@@ -1,16 +1,16 @@
 var test = require('tap').test;
 var jtrace = require('../index.js');
 
-var JTrace = jtrace.JTrace;
 var Tracer = jtrace.Tracer;
+var Probe  = jtrace.Probe;
 
 function yes() { return true; }
 
 test('happy path', function (t) {
   t.plan(4);
 
-  var jtrace = new JTrace();
-  var trace = Tracer.NewJTracer(jtrace);
+  var jtrace = new Tracer();
+  var trace = Probe.NewWithTracer(jtrace);
   var item = {a: 1};
 
   jtrace.on(yes, function (facets, values) {
@@ -27,8 +27,8 @@ test('happy path', function (t) {
 test('child path', function (t) {
   t.plan(4);
 
-  var jtrace = new JTrace();
-  var trace = Tracer.NewJTracer(jtrace).segment('my_module');
+  var jtrace = new Tracer();
+  var trace = Probe.NewWithTracer(jtrace).segment('my_module');
   var item = {a: 1};
 
   jtrace.on(yes, function (facets, values) {
