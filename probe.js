@@ -26,6 +26,7 @@ Facet.RANK.NONE   = 000;
 Facet.RANK.ALL    = 777;
 
 Facet.ORDER       = {};
+Facet.ORDER.MARK  = 'mark'; // for non-stateful events
 Facet.ORDER.BEGIN = 'begin';
 Facet.ORDER.ERROR = 'error';
 Facet.ORDER.CLOSE = 'close';
@@ -52,7 +53,7 @@ function _trap(probe, rank, event, order, trap) {
 function _trace(probe, rank, event, order, value) {
   assert(event);
   assert.equal(typeof event, 'string');
-  
+
   assert(order);
   assert.equal(typeof order, 'string')
 
@@ -67,24 +68,42 @@ function _trace(probe, rank, event, order, value) {
   _trap(probe, rank, event, order, trap);
 };
 
-Probe.prototype.dir = function dirTrace(event, order, value) {
-  _trace(this, Facet.RANK.DIR, event, order, value);
+function _mutate(probe, rank, arguments) {
+  assert(arguments.length >= 2, 'too few arguments');
+
+  var event, order, value;
+
+  event = arguments[0];
+
+  if (arguments.length === 3) {
+    order = arguments[1];
+    value = arguments[2];
+  } else if (arguments.length === 2) {
+    order = Facet.ORDER.MARK;
+    value = arguments[1];
+  }
+
+  _trace(probe, rank, event, order, value);
+}
+
+Probe.prototype.dir = function dirTrace() {
+  _mutate(this, Facet.RANK.DIR, arguments);
 };
 
-Probe.prototype.log = function logTrace(event, order, value) {
-  _trace(this, Facet.RANK.LOG, event, order, value);
+Probe.prototype.log = function logTrace() {
+  _mutate(this, Facet.RANK.LOG, arguments);
 };
 
-Probe.prototype.info = function infoTrace(event, order, value) {
-  _trace(this, Facet.RANK.INFO, event, order, value);
+Probe.prototype.info = function infoTrace() {
+  _mutate(this, Facet.RANK.INFO, arguments);
 };
 
-Probe.prototype.warn = function warnTrace(event, order, value) {
-  _trace(this, Facet.RANK.WARN, event, order, value);
+Probe.prototype.warn = function warnTrace() {
+  _mutate(this, Facet.RANK.WARN, arguments);
 };
 
-Probe.prototype.error = function errorTrace(event, order, value) {
-  _trace(this, Facet.RANK.ERROR, event, order, value);
+Probe.prototype.error = function errorTrace() {
+  _mutate(this, Facet.RANK.ERROR, arguments);
 };
 
 Probe.prototype.make = function make(name) {

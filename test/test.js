@@ -25,7 +25,7 @@ test('happy path', function (t) {
 });
 
 test('child path', function (t) {
-  t.plan(4);
+  t.plan(5);
 
   var jtrace = new Tracer();
   var trace = Probe.NewWithTracer(jtrace).make('my_module');
@@ -34,10 +34,30 @@ test('child path', function (t) {
   jtrace.on(yes, function (facets, values) {
     t.equals(facets.event, 'test');
     t.equals(facets.rank, 001);
+    t.equals(facets.order, 'test');
     t.deepEquals(facets.module, 'my_module');
     t.deepEquals(item, values);
   });
 
   trace.dir('test', 'test', item);
+  t.end();
+});
+
+test('call without order argument', function (t) {
+  t.plan(5);
+
+  var jtrace = new Tracer();
+  var trace = Probe.NewWithTracer(jtrace).make('my_module');
+  var item = {a: 1};
+
+  jtrace.on(yes, function (facets, values) {
+    t.equals(facets.event, 'test');
+    t.equals(facets.rank, 001);
+    t.equals(facets.order, 'mark');
+    t.deepEquals(facets.module, 'my_module');
+    t.deepEquals(item, values);
+  });
+
+  trace.dir('test', item);
   t.end();
 });
