@@ -34,7 +34,7 @@ Tracer.prototype.emit = function emitTrace(facets, trap) {
             signature `handler(facets, item)`
 
 */
-Tracer.prototype.on = function onTrace(filter, handler) {
+Tracer.prototype.onEvent = function onTrace(filter, handler) {
   this.enabled = true;
   this.handlers.push({
     filter  : filter,
